@@ -1,186 +1,173 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "version": "1.1.0",
-      "title": "Article Dashboard API",
-      "description": "API documentation for Article Dashboard with authentication, article management, and image upload"
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.1.0",
+    "title": "Article Dashboard API",
+    "description": "API documentation for Article Dashboard with authentication, article management, and image upload"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token in the format `Bearer <token>`"
+      }
     },
-    "host": "localhost:5000",
-    "basePath": "/api",
-    "schemes": ["http"],
-    "paths": {
-      "/auth/register": {
-        "post": {
-          "summary": "Register a new user",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "username": { "type": "string" },
-                  "password": { "type": "string" },
-                  "role": { "type": "string", "enum": ["admin", "user"] }
-                }
-              }
-            }
-          ],
-          "responses": {
-            "201": { "description": "User registered successfully" },
-            "500": { "description": "Internal server error" }
-          }
+    "schemas": {
+      "Article": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "My First Article" },
+          "content": { "type": "string", "example": "This is the content of the article." },
+          "image_url": { "type": "string", "example": "http://example.com/image.png" }
         }
-      },
-      "/auth/login": {
-        "post": {
-          "summary": "Login a user",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": { "type": "string" },
-                  "password": { "type": "string" }
-                }
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Token returned",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "token": { "type": "string" }
-                }
-              }
-            },
-            "401": { "description": "Invalid credentials" }
-          }
-        }
-      },
-      "/articles": {
-        "get": {
-          "summary": "Get all articles",
-          "parameters": [
-            {
-              "in": "header",
-              "name": "Authorization",
-              "required": true,
-              "type": "string",
-              "description": "Bearer <token>"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "List of articles",
-              "schema": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": { "type": "integer" },
-                    "title": { "type": "string" },
-                    "content": { "type": "string" },
-                    "image_url": { "type": "string" }
-                  }
+                  "username": { "type": "string", "example": "user123" },
+                  "password": { "type": "string", "example": "password123" },
+                  "role": { "type": "string", "enum": ["admin", "user"], "example": "user" }
                 }
               }
             }
           }
         },
-        "post": {
-          "summary": "Create a new article with an image",
-          "consumes": ["multipart/form-data"],
-          "parameters": [
-            {
-              "in": "header",
-              "name": "Authorization",
-              "required": true,
-              "type": "string",
-              "description": "Bearer <token>"
-            },
-            {
-              "in": "formData",
-              "name": "title",
-              "required": true,
-              "type": "string",
-              "description": "Title of the article"
-            },
-            {
-              "in": "formData",
-              "name": "content",
-              "required": true,
-              "type": "string",
-              "description": "Content of the article"
-            },
-            {
-              "in": "formData",
-              "name": "image",
-              "required": true,
-              "type": "file",
-              "description": "Image file for the article"
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "user123" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
             }
-          ],
-          "responses": {
-            "201": { "description": "Article created successfully" },
-            "500": { "description": "Internal server error" }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string", "example": "Bearer <token>" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/articles": {
+      "get": {
+        "summary": "Get all articles",
+        "responses": {
+          "200": {
+            "description": "List of articles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Article" }
+                }
+              }
+            }
           }
         }
       },
-      "/articles/{id}": {
-        "put": {
-          "summary": "Update an article with a new image",
-          "consumes": ["multipart/form-data"],
-          "parameters": [
-            {
-              "in": "header",
-              "name": "Authorization",
-              "required": true,
-              "type": "string",
-              "description": "Bearer <token>"
-            },
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "type": "integer",
-              "description": "ID of the article"
-            },
-            {
-              "in": "formData",
-              "name": "title",
-              "required": false,
-              "type": "string",
-              "description": "Title of the article"
-            },
-            {
-              "in": "formData",
-              "name": "content",
-              "required": false,
-              "type": "string",
-              "description": "Content of the article"
-            },
-            {
-              "in": "formData",
-              "name": "image",
-              "required": false,
-              "type": "file",
-              "description": "New image file for the article"
+      "post": {
+        "summary": "Create a new article with an image",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "example": "New Article Title" },
+                  "content": { "type": "string", "example": "New Article Content" },
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
             }
-          ],
-          "responses": {
-            "200": { "description": "Article updated successfully" },
-            "404": { "description": "Article not found" },
-            "500": { "description": "Internal server error" }
           }
+        },
+        "responses": {
+          "201": { "description": "Article created successfully" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/articles/{id}": {
+      "put": {
+        "summary": "Update an article with a new image",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "example": "Updated Title" },
+                  "content": { "type": "string", "example": "Updated Content" },
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Article updated successfully" },
+          "404": { "description": "Article not found" },
+          "500": { "description": "Internal server error" }
         }
       }
     }
   }
-  
+}
